@@ -185,6 +185,7 @@ app.locals.allowPDFExport = config.allowPDFExport
 app.locals.allowPublish = config.allowPublish
 app.locals.allowBoxUpload = config.allowBoxUpload
 app.locals.isBoxEnable = config.isBoxEnable
+app.locals.allowRemoveUserData = config.allowRemoveUserData
 app.locals.authProviders = {
   facebook: config.isFacebookEnable,
   twitter: config.isTwitterEnable,
