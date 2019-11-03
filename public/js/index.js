@@ -948,6 +948,14 @@ ui.toolbar.download.rawhtml.click(function (e) {
   e.stopPropagation()
   exportToRawHTML(ui.area.markdown)
 })
+// box
+ui.toolbar.download.box.click(function (e) {
+    var url = noteurl + '/box';
+    $.get(url).done(function(burl){
+        window.open(burl, "_blank");
+    })
+    return false;
+})
 // pdf
 ui.toolbar.download.pdf.attr('download', '').attr('href', noteurl + '/pdf')
 // export to dropbox

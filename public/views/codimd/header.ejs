@@ -13,7 +13,7 @@
             <ul class="dropdown-menu list" role="menu" aria-labelledby="menu">
             </ul>
         </div>
-        <a class="navbar-brand pull-left" href="<%- serverURL %>/"><i class="fa fa-file-text"></i> CodiMD</a>
+        <a class="navbar-brand pull-left" href="<%- serverURL %>/"><i class="fa fa-file-text"></i> CLOUDNATIVE</a>
         <div class="nav-mobile pull-right visible-xs">
             <span class="btn btn-link btn-file ui-upload-image" title="Upload Image" style="display:none;">
                 <i class="fa fa-camera"></i><input type="file" accept="image/*" name="upload" multiple>
@@ -24,8 +24,10 @@
             <ul class="dropdown-menu list" role="menu" aria-labelledby="menu">
                 <li role="presentation"><a role="menuitem" class="ui-new" tabindex="-1" href="<%- serverURL %>/new" target="_blank" rel="noopener"><i class="fa fa-plus fa-fw"></i> <%= __('New') %></a>
                 </li>
-                <li role="presentation"><a role="menuitem" class="ui-publish" tabindex="-1" href="#" target="_blank" rel="noopener"><i class="fa fa-share-square-o fa-fw"></i> <%= __('Publish') %></a>
-                </li>
+                <% if(typeof allowPublish !== 'undefined' && allowPublish) {%>
+                  <li role="presentation"><a role="menuitem" class="ui-publish" tabindex="-1" href="#" target="_blank" rel="noopener"><i class="fa fa-share-square-o fa-fw"></i> <%= __('Publish') %></a>
+                  </li>
+                <% } %>
                 <li class="divider"></li>
                 <li class="dropdown-header"><%= __('Extra') %></li>
                 <li role="presentation"><a role="menuitem" class="ui-extra-revision" tabindex="-1" data-toggle="modal" data-target="#revisionModal"><i class="fa fa-history fa-fw"></i> <%= __('Revision') %></a>
@@ -66,6 +68,10 @@
                 </li>
                 <li role="presentation"><a role="menuitem" class="ui-download-raw-html" tabindex="-1" href="#" target="_self"><i class="fa fa-file-code-o fa-fw"></i> <%= __('Raw HTML') %></a>
                 </li>
+                <% if(isBoxEnable && allowBoxUpload) { %>
+                    <li role="presentation"><a role="menuitem" class="ui-download-box" tabindex="-1" href="#" target="_self"><i class="fa fa-file-file-text fa-fw"></i> Box </a>
+                    </li>
+                <% } %>
                 <% if(typeof allowPDFExport !== 'undefined' && allowPDFExport) {%>
                   <li role="presentation"><a role="menuitem" class="ui-download-pdf-beta" tabindex="-1" href="#" target="_self"><i class="fa fa-file-pdf-o fa-fw"></i> PDF (Beta)</a>
                   </li>
@@ -119,11 +125,13 @@
                     <i class="fa fa-plus"></i> <%= __('New') %>
                 </a>
             </li>
-            <li>
-                <a href="#" target="_blank" rel="noopener" class="ui-publish">
-                    <i class="fa fa-share-square-o"></i> <%= __('Publish') %>
-                </a>
-            </li>
+            <% if(typeof allowPublish !== 'undefined' && allowPublish) {%>
+                <li>
+                    <a href="#" target="_blank" rel="noopener" class="ui-publish">
+                        <i class="fa fa-share-square-o"></i> <%= __('Publish') %>
+                    </a>
+                </li>
+            <% } %>
             <li>
                 <a data-toggle="dropdown">
                     <%= __('Menu') %> <i class="fa fa-caret-down"></i>
@@ -168,6 +176,10 @@
                     </li>
                     <li role="presentation"><a role="menuitem" class="ui-download-raw-html" tabindex="-1" href="#" target="_self"><i class="fa fa-file-code-o fa-fw"></i> <%= __('Raw HTML') %></a>
                     </li>
+                    <% if(isBoxEnable && allowBoxUpload) { %>
+                        <li role="presentation"><a role="menuitem" class="ui-download-box" tabindex="-1" href="#" target="_self"><i class="fa fa-file-file-text fa-fw"></i> Box </a>
+                        </li>
+                    <% } %>
                     <% if(typeof allowPDFExport !== 'undefined' && allowPDFExport) {%>
                       <li role="presentation"><a role="menuitem" class="ui-download-pdf-beta" tabindex="-1" href="#" target="_self"><i class="fa fa-file-pdf-o fa-fw"></i> PDF (Beta)</a>
                       </li>

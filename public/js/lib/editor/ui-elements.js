@@ -19,7 +19,8 @@ export const getUIElements = () => ({
       markdown: $('.ui-download-markdown'),
       html: $('.ui-download-html'),
       rawhtml: $('.ui-download-raw-html'),
-      pdf: $('.ui-download-pdf-beta')
+      pdf: $('.ui-download-pdf-beta'),
+      box: $('.ui-download-box')
     },
     export: {
       dropbox: $('.ui-save-dropbox'),

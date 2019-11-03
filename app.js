@@ -182,6 +182,9 @@ app.locals.allowAnonymous = config.allowAnonymous
 app.locals.allowAnonymousEdits = config.allowAnonymousEdits
 app.locals.permission = config.permission
 app.locals.allowPDFExport = config.allowPDFExport
+app.locals.allowPublish = config.allowPublish
+app.locals.allowBoxUpload = config.allowBoxUpload
+app.locals.isBoxEnable = config.isBoxEnable
 app.locals.authProviders = {
   facebook: config.isFacebookEnable,
   twitter: config.isTwitterEnable,
@@ -208,6 +211,7 @@ app.locals.enableGitlabSnippets = config.isGitlabSnippetsEnable
 app.use(require('./lib/web/baseRouter'))
 app.use(require('./lib/web/statusRouter'))
 app.use(require('./lib/web/auth'))
+app.use(require('./lib/web/apiRouter'))
 app.use(require('./lib/web/historyRouter'))
 app.use(require('./lib/web/userRouter'))
 app.use(require('./lib/web/imageRouter'))
