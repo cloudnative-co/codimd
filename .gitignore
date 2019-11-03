@@ -15,6 +15,7 @@ tmp/
 backups/
 *.pid
 *.log
+*.pem
 *.sqlite
 
 # ignore config files
