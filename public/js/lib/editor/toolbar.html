@@ -43,6 +43,9 @@
       <a id="makeComment" class="btn btn-sm btn-dark text-uppercase" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" title="Comment">
           <i class="fa fa-comment fa-fw"></i>
       </a>
+      <a id="makeMetadata" class="btn btn-sm btn-dark text-uppercase" data-toggle="modal" data-target="#tagsModal" title="Metadata">
+          <i class="fa fa-info-circle"></i>
+      </a>
     </div>
     <span class="btn-group table-tools hidden-xs" style="display: none;">
       <span class="separator" style="margin-left: -10px;">|</span>
@@ -86,5 +89,43 @@
           <i class="fa fa-ban fa-fw"></i>
       </a>
     </span>
+  </div>
+  <div class="modal fade" id="tagsModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="mySmallModalLabel"><i class="fa fa-info-circle"></i> メタデータ</h4>
+        </div>
+        <div class="modal-body">
+          <h4 class="modal-title" id="mySmallModalLabel"><i class="fa fa-file-text-o"></i> タイトル</h4>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <input id="metaTitle" type="text" class="form-control" name="title" placeholder="TITLE">
+              <span class="help-block control-label with-errors" style="display: inline;"></span>
+            </div>
+          </div>
+          <hr>
+          <h4 class="modal-title" id="mySmallModalLabel"><i class="fa fa-tag"></i> タグ</h4>
+          <div id="metaTags">
+          <div class="form-group">
+            <div class="col-sm-12">
+               <input type="text" class="form-control" name="tag" placeholder="tag" />
+               <span class="help-block control-label with-errors" style="display: inline;"></span>
+            </div>
+          </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <button id="addMetaTag" type="button" class="btn btn-default fa fa-plus-circle">タグ追加</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="updateMetadata" type="button" class="btn btn-primary" data-dismiss="modal">更新</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

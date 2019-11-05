@@ -161,7 +161,9 @@ export default class Editor {
     var makeTable = $('#makeTable')
     var makeLine = $('#makeLine')
     var makeComment = $('#makeComment')
-
+    var tagsModal = $('#tagsModal')
+    var addMetaTag = $('#addMetaTag')
+    var updateMetadata = $('#updateMetadata')
     var insertRow = $('#insertRow')
     var deleteRow = $('#deleteRow')
     var moveRowUp = $('#moveRowUp')
@@ -235,6 +237,120 @@ export default class Editor {
       utils.insertText(this.editor, '> []')
     })
 
+    updateMetadata.click(() => {
+        var metadata = ['---']
+        var title = $('#metaTitle').val()
+        var metaTags = $('[id=metaTag]');
+        var tags = []
+        for (var i=0; i< metaTags.length; i++){
+            var tag = $(metaTags[i]).val().trim()
+            if (tag.length == 0) {
+                continue
+            }
+            tags.push(tag)
+        }
+        metadata.push("title: " + title)
+        metadata.push("tags: " + tags.join(', '))
+
+        var lines = this.editor.doc.children[0].lines;
+        var other_metadata = []
+        var startline = -1
+        var endline = -1
+        if (lines[0].text == '---') {
+            var start = false
+            for(var i in lines) {
+                var line = lines[i].text
+                if (line == "---" && i == 0){
+                    startline = i
+                    start = true
+                    continue
+                }
+                if (start) {
+                    if (line.length == 0) {
+                        continue
+                    }
+                    if (line == "---" && i > 0){
+                        endline = Number(i) + 1
+                        break
+                    } else {
+                        var meta = line.split(": ")
+                        var key = meta[0].trim()
+                        if (key != 'title' && key != 'tags'){
+                            other_metadata.push(line)
+                        }
+                    }
+                }
+            }
+        }
+        if (other_metadata.length > 0){
+            metadata.push(other_metadata.join("\n"))
+        }
+        metadata.push('---\n')
+        metadata = metadata.join('\n')
+        if (startline == -1 || endline == -1){
+            startline = 0
+            endline = 0
+        }
+        this.editor.setSelection(
+            {line: startline, ch: 0},
+            {line: endline, ch: 0}
+        )
+        this.editor.replaceSelection(metadata)
+        this.editor.refresh()
+    })
+
+    this.addTagInput = function(val) {
+        var form = $('#metaTags');
+        var gr = $('<div>', { class: 'form-group' });
+        var col = $('<div>', { class: 'col-sm-12' });
+        var inp = $('<input>', { id: 'metaTag', class: 'form-control', type: 'text', value: val , name: 'tag', placeholder: 'tag'});
+        var spn = $('<span>', { class: "help-block control-label with-errors", style: "display: inline;" });
+        col.append(inp);
+        col.append(spn);
+        gr.append(col);
+        form.append(gr);
+    }
+
+    addMetaTag.click(() => {
+        this.addTagInput(null);
+    })
+
+    // show tabs modal dialog
+    tagsModal.on('show.bs.modal', (event) => {
+        var lines = this.editor.doc.children[0].lines;
+        var start = false
+        var form = $('#metaTags');
+        form.empty();
+        for(var i in lines) {
+            var line = lines[i].text
+            if (line == "---" && i == 0){
+                start = true
+                continue
+            }
+            if (start) {
+                if (line == "---" && i > 0){
+                    start = false
+                    break
+                }
+                var meta = line.split(": ")
+                var key = meta[0].trim()
+                var value = meta[1].trim()
+                switch(key){
+                    case 'title':
+                        $('#metaTitle').val(value)
+                        break
+                    case 'tags':
+                        var tags = value.split(',');
+                        for(var j in tags) {
+                            var tag = tags[j].trim()
+                            this.addTagInput(tag)
+                        }
+                        break
+                }
+                continue
+            }
+        }
+    })
     // table tools UI
     const opts = options({
       smartCursor: true,
