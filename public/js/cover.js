@@ -13,6 +13,7 @@ import {
   clearDuplicatedHistory,
   deleteServerHistory,
   getHistory,
+  getTagCount,
   getStorageHistory,
   parseHistory,
   parseServerToHistory,
@@ -77,6 +78,7 @@ function pageInit () {
       $('.ui-signout').show()
       $('.ui-history').click()
       parseServerToHistory(historyList, parseHistoryCallback)
+      getTagMarkers()
     },
     () => {
       $('.ui-signin').show()
@@ -88,6 +90,24 @@ function pageInit () {
       parseStorageToHistory(historyList, parseHistoryCallback)
     }
   )
+}
+
+function getTagMarkers() {
+    getTagCount(function(data){
+        var tags = data.tags;
+        var frame = $('#tags_frame')
+        Object.keys(tags).forEach(function(key) {
+            var frm = $('<div class="tag_frame">');
+            var name = $('<div class="tag_name">');
+            var mark = $('<div class="tag_count_circle">');
+            name.text(key);
+            mark.text(tags[key]);
+            frm.append(name);
+            frm.append(mark);
+            frm.click(e => tagClick(e));
+            frame.append(frm);
+        });
+    });
 }
 
 $('.masthead-nav li').click(function () {
@@ -428,3 +448,16 @@ $('.ui-use-tags').on('change', function () {
 $('.search').keyup(() => {
   checkHistoryList()
 })
+
+function tagClick(e) {
+    var jqe = $(e.currentTarget.children[0]);
+    var tag = jqe.text();
+    for (var i in filtertags) {
+        var dtag = filtertags[i]
+        if (dtag.text == tag){
+            $('.ui-use-tags').select2('data', [dtag])
+            $('.ui-use-tags').trigger('change')
+            break
+        }
+    }
+}

@@ -187,6 +187,14 @@ function generateHistory (title, tags, notehistory) {
   return notehistory
 }
 
+export function getTagCount (callback) {
+    $.get(`${serverurl}/tagcount`).done(data => {
+        callback(data)
+    }).fail((xhr, status, error) => {
+        console.error(xhr.responseText)
+    });
+}
+
 // used for outer
 export function getHistory (callback) {
   checkIfAuth(

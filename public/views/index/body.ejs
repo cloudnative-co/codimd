@@ -39,7 +39,6 @@
                     </nav>
                 </div>
             </div>
-
             <div id="home" class="section"<% if(signin) { %> style="display:none;"<% } %>>
                 <div class="inner cover">
                     <h1 class="cover-heading"><i class="fa fa-file-text"></i> CodiMD</h1>
@@ -87,6 +86,7 @@
                     </div>
                 </div>
             </div>
+            <div id="tags_frame" <% if(!signin) { %> style="display:none;"<% } %>></div>
 
             <div id="history" class="section"<% if(!signin) { %> style="display:none;"<% } %>>
                 <div class="ui-signin"<% if(signin) { %> style="display:none;"<% } %>>
