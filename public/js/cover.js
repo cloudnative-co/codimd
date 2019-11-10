@@ -75,7 +75,7 @@ const options2 = {
               <div class="content">
                 <h4 class="text"></h4>
                 <p>
-                  <i> 最終アクセス <i class="owner"></i></i>
+                  <i> オーナー <i class="owner"></i></i>
                   <hr>
                   <i><i class="fa fa-clock-o"></i> 最終更新 </i><i class="fromNow"></i>
                   <br>

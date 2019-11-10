@@ -124,7 +124,7 @@
     "Private": "プライベート - オーナーのみ閲覧・編集可能",
     "Refresh notes": "ノート一覧を更新",
     "Delete note": "このノートの削除",
-    "Sort by user": "アクゼスユーザー順でソート",
-    "Access user": "アクセスユーザー",
+    "Sort by owner": "オーナー順でソート",
+    "Owner": "オーナー",
     "No notes": "ノートはありません"
 }
