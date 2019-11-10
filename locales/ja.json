@@ -4,6 +4,7 @@
     "Best way to write and share your knowledge in markdown.": "Markdownでナレッジを蓄積・共有できるベストツール",
     "Intro": "サービスの紹介",
     "History": "履歴",
+    "Note": "ノート",
     "New guest note": "新規ゲストノート",
     "Collaborate with URL": "URLで共同編集",
     "Support charts and MathJax": "グラフとMathJaxのサポート",
@@ -15,7 +16,9 @@
     "or": "または",
     "Sign Out": "サインアウト",
     "Explore all features": "すべての機能をチェック",
-    "Select tags...": "タグで検索",
+    "Select tags...": "タグで絞り込み",
+    "Select titles...": "タイトルで絞り込み",
+    "Select owner...": "オーナーで絞り込み",
     "Search keyword...": "キーワードで検索",
     "Sort by title": "タイトル順でソート",
     "Title": "タイトル",
@@ -119,5 +122,9 @@
     "Limited": "制限 - ログインユーザーのみ編集可能",
     "Protected": "保護 - オーナーのみ編集可能",
     "Private": "プライベート - オーナーのみ閲覧・編集可能",
-    "Delete note": "このノートの削除"
+    "Refresh notes": "ノート一覧を更新",
+    "Delete note": "このノートの削除",
+    "Sort by owner": "オーナー順でソート",
+    "Owner": "オーナー",
+    "No notes": "ノートはありません"
 }

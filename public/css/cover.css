@@ -416,7 +416,7 @@ a.btn.btn-social > i.oauth-icon > img {
     padding: 2px;
     flex-flow: column nowrap;
     display: inline-block;
-    border-radius:10%;
+    border-radius:4px;
 }                                                                                                                                                                                                                                                                                                                             
 .tag_name {
     height: 30px;
@@ -436,3 +436,35 @@ a.btn.btn-social > i.oauth-icon > img {
     float:left;
 }
 
+
+.ui-use-notes-tags {
+    min-width: 172px;
+    max-width: 344px;
+}
+
+.ui-notes-close {
+    position: absolute;
+    right: 14px;
+    top: 15px;
+    font-size: 16px;
+    opacity: 0.5;
+}
+.ui-notes-close:hover {
+    opacity: 1;
+}
+.ui-notes-pin {
+    position: absolute;
+    left: 14px;
+    top: 15px;
+    font-size: 16px;
+    opacity: 0.2;
+	transition: opacity 0.2s ease-in-out;
+	-webkit-transition: opacity 0.2s ease-in-out;
+}
+.item:hover .ui-notes-pin:hover {
+    opacity: 1;
+}
+.item .ui-notes-pin.active {
+	opacity: 1;
+    color: #d43f3a;
+}
