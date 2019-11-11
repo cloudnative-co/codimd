@@ -176,6 +176,7 @@ export default class Editor {
     var alignCenter = $('#alignCenter')
     var alignRight = $('#alignRight')
     var alignNone = $('#alignNone')
+    var titleInput = $('#titleInput')
 
     makeBold.click(() => {
       utils.wrapTextWith(this.editor, this.editor, '**')
@@ -236,9 +237,11 @@ export default class Editor {
     makeComment.click(() => {
       utils.insertText(this.editor, '> []')
     })
-
+    /*
+     @brief     メタデータダイアログ更新ボタンクリック
+     */
     updateMetadata.click(() => {
-        var metadata = ['---']
+        var metadata = this.editor.metadata()
         var title = $('#metaTitle').val()
         var metaTags = $('[id=metaTag]');
         var tags = []
@@ -249,56 +252,13 @@ export default class Editor {
             }
             tags.push(tag)
         }
-        metadata.push("title: " + title)
-        metadata.push("tags: " + tags.join(', '))
-
-        var lines = this.editor.doc.children[0].lines;
-        var other_metadata = []
-        var startline = -1
-        var endline = -1
-        if (lines[0].text == '---') {
-            var start = false
-            for(var i in lines) {
-                var line = lines[i].text
-                if (line == "---" && i == 0){
-                    startline = i
-                    start = true
-                    continue
-                }
-                if (start) {
-                    if (line.length == 0) {
-                        continue
-                    }
-                    if (line == "---" && i > 0){
-                        endline = Number(i) + 1
-                        break
-                    } else {
-                        var meta = line.split(": ")
-                        var key = meta[0].trim()
-                        if (key != 'title' && key != 'tags'){
-                            other_metadata.push(line)
-                        }
-                    }
-                }
-            }
-        }
-        if (other_metadata.length > 0){
-            metadata.push(other_metadata.join("\n"))
-        }
-        metadata.push('---\n')
-        metadata = metadata.join('\n')
-        if (startline == -1 || endline == -1){
-            startline = 0
-            endline = 0
-        }
-        this.editor.setSelection(
-            {line: startline, ch: 0},
-            {line: endline, ch: 0}
-        )
-        this.editor.replaceSelection(metadata)
-        this.editor.refresh()
+        metadata.title = title
+        metadata.tags = tags.join(', ')
+        this.editor.setMetadata(metadata)
     })
-
+    /*
+     @brief     メタデータタグ追加処理
+     */
     this.addTagInput = function(val) {
         var form = $('#metaTags');
         var gr = $('<div>', { class: 'form-group' });
@@ -310,44 +270,33 @@ export default class Editor {
         gr.append(col);
         form.append(gr);
     }
-
+    /*
+     @brief     メタデータタグ追加ボタンクリック
+     */
     addMetaTag.click(() => {
         this.addTagInput(null);
     })
-
-    // show tabs modal dialog
+    /*
+     @brief     メタデータダイアログ表示イベント
+     */
     tagsModal.on('show.bs.modal', (event) => {
-        var lines = this.editor.doc.children[0].lines;
-        var start = false
         var form = $('#metaTags');
         form.empty();
-        for(var i in lines) {
-            var line = lines[i].text
-            if (line == "---" && i == 0){
-                start = true
-                continue
-            }
-            if (start) {
-                if (line == "---" && i > 0){
-                    start = false
-                    break
+        var metadata = this.editor.metadata()
+        if (! metadata) {
+            return
+        }
+        if (metadata.title) {
+            $('#metaTitle').val(metadata.title)
+        }
+        if (metadata.tags) {
+            var tags = metadata.tags.split(",")
+            for (var i in tags) {
+                var tag = tags[i]
+                tag = tag.trim()
+                if (tag != "") {
+                     this.addTagInput(tag)
                 }
-                var meta = line.split(": ")
-                var key = meta[0].trim()
-                var value = meta[1].trim()
-                switch(key){
-                    case 'title':
-                        $('#metaTitle').val(value)
-                        break
-                    case 'tags':
-                        var tags = value.split(',');
-                        for(var j in tags) {
-                            var tag = tags[j].trim()
-                            this.addTagInput(tag)
-                        }
-                        break
-                }
-                continue
             }
         }
     })
@@ -415,6 +364,20 @@ export default class Editor {
     alignNone.click(() => {
       this.tableEditor.alignColumn(Alignment.NONE, opts)
       this.editor.focus()
+    })
+
+    titleInput.keyup((e) => {
+        var metadata = this.editor.metadata()
+        var title = $(titleInput).val()
+        metadata.title = title
+        this.editor.setMetadata(metadata)
+    })
+
+    titleInput.focusin((e) => {
+        var meta = this.editor.metadata()
+        if (meta && meta.title){
+            $(titleInput).val(meta.title)
+        }
     })
   }
 
@@ -819,8 +782,97 @@ export default class Editor {
       otherCursors: true,
       placeholder: "← Start by entering a title here\n===\nVisit /features if you don't know what to do.\nHappy hacking :)"
     })
-
     this.tableEditor = initTableEditor(this.editor)
+
+
+    /*
+     @brief     メタデータライン取得
+     @details   エディタ中のメタデータの開始と終了の行番号を返却します
+     */
+    this.editor.getMetadataLine = function(){
+        var lines = $(this)[0].doc.children[0].lines;
+        var startline = -1
+        var endline = -1
+        if (lines[0].text == '---') {
+            var start = false
+            for(var i in lines) {
+                var line = lines[i].text
+                if (line == "---" && i == 0){
+                    startline = Number(i)
+                    start = true
+                    continue
+                }
+                if (start) {
+                    if (line.length == 0) {
+                        continue
+                    }
+                    if (line == "---" && i > 0){
+                        endline = Number(i) + 1
+                        break
+                    }
+                }
+            }
+        }
+        if (startline == -1 || endline == -1){
+            startline = 0
+            endline = 0
+        }
+        return {
+            start: {line: startline, ch: 0},
+            end: {line: endline, ch: 0}
+        }
+    }
+    /*
+     @brief         メタデータの保存
+     @details       指定した辞書にて文書中にメタデータを書き込みます
+     */
+    this.editor.setMetadata = function(value){
+        var l_num = $(this)[0].getMetadataLine()
+        var metadata;
+        try {
+            metadata = window.jsyaml.dump(value)
+        } catch (err){
+            return false
+        }
+        metadata = "---\n" + metadata + "---\n"
+        var cur = $(this)[0].getCursor()
+        $(this)[0].setSelection(l_num.start, l_num.end)
+        $(this)[0].replaceSelection(metadata)
+        $(this)[0].refresh()
+        $(this)[0].setCursor({line: cur.line, ch: cur.ch})
+    }
+    /*
+     @brief     メタデータ取得
+     @details   エディタ中のメタデータを辞書構造にて返却します
+     */
+    this.editor.metadata = function(){
+        var l_num = $(this)[0].getMetadataLine()
+        var lines = $(this)[0].doc.children[0].lines;
+        if (l_num.start.line == 0 && l_num.end.line == 0) {
+            return {}
+        }
+        lines = lines.slice(l_num.start.line, l_num.end.line - 1)
+        for(var i in lines) {
+            var line = lines[i].text
+            lines[i] = line
+        }
+        try {
+            var meta = window.jsyaml.safeLoad(lines.join("\n"))
+            return meta
+        } catch (err) {
+            return null
+        }
+    }
+    /*
+     @brief     エディタのキーイベント
+     @details   タイトルを取得反映
+     */
+    this.editor.on('keyup', function(cm, e) {
+        var meta = $(cm)[0].metadata()
+        if (meta && meta.title){
+            $(titleInput).val(meta.title)
+        }
+    })
 
     return this.editor
   }
