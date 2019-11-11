@@ -871,6 +871,8 @@ export default class Editor {
         var meta = $(cm)[0].metadata()
         if (meta && meta.title){
             $(titleInput).val(meta.title)
+        } else {
+            $(titleInput).val("")
         }
     })
 
