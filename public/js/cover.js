@@ -25,8 +25,7 @@ import {
 } from './history'
 
 import {
-  parseServerToNotes,
-  getTags
+    notesInit
 } from './notes'
 
 
@@ -66,36 +65,7 @@ const options = {
   }]
 }
 
-const options2 = {
-  valueNames: ['id', 'text', 'timestamp', 'fromNow', 'time', 'tags', 'owner', 'updated', 'created'],
-  item: `<li class="col-xs-12 col-sm-6 col-md-6 col-lg-4">
-          <span class="id" style="display:none;"></span>
-          <a href="#">
-            <div class="item">
-              <div class="content">
-                <h4 class="text"></h4>
-                <p>
-                  <i> オーナー <i class="owner"></i></i>
-                  <hr>
-                  <i><i class="fa fa-clock-o"></i> 最終更新 </i><i class="fromNow"></i>
-                  <br>
-                  <i><i class="fa fa-clock-o"></i> 作成日時:<i class="created"></i></i>
-                  <br>
-                  <i><i class="fa fa-clock-o"></i> 更新日時:<i class="time"></i></i>
-                </p>
-                <p class="tags"></p>
-              </div>
-            </div>
-          </a>
-        </li>`,
-  page: 18,
-  pagination: [{
-    outerWindow: 1
-  }]
-}
-
 const historyList = new List('history', options)
-const notesList = new List('notes', options2)
 
 window.migrateHistoryFromTempCallback = pageInit
 setloginStateChangeEvent(pageInit)
@@ -115,7 +85,8 @@ function pageInit () {
       //$('.ui-history').click()
       parseServerToHistory(historyList, parseHistoryCallback)
       // ノートの取得
-      parseServerToNotes(notesList, parseNotesCallback)
+      notesInit(),
+//      parseServerToNotes(notesList, parseNotesCallback)
       $('.ui-notes').click()
     },
     () => {
@@ -483,7 +454,10 @@ $('.search').keyup(() => {
  * Notes
  *
  * ************************************************************************** */
+/*
 function parseNotesCallback (list, notehistory) {
+    console.log(list)
+    console.log(notes)
     checkNotesList()
     // sort by pinned then timestamp
     list.sort('', {sortFunction (a, b) {
@@ -538,17 +512,14 @@ function tagClick(e) {
     for (var i in items) {
         var dtag = items[i]
         if (items[i].text == tag){
-            console.log("hit tag")
             $('.ui-use-notes-tags').select2('data', [items[i]])
-            $('.ui-use-notes-tags').trigger('change')
+            changeKeywords()
             break
         }
     }
 }
 
-
 function checkNotesList () {
-    console.log($('#notes-list').children().length)
   if ($('#notes-list').children().length > 0) {
     $('.pagination').show()
     $('.ui-nonotes').hide()
@@ -557,10 +528,16 @@ function checkNotesList () {
     $('.ui-nonotes').slideDown()
   }
 }
-
+*/
+/*
+ @breif     note list refresh button click event
+ */
+/*
 $('.ui-refresh-notes').click(() => {
     const lastTags = $('.ui-use-notes-tags').select2('val')
+    const lastOwner = $('.ui-use-owner').select2('val')
     $('.ui-use-notes-tags').select2('val', '')
+    $('.ui-use-owner').select2('val', '')
     notesList.filter()
     const lastKeyword = $('.search_notes').val()
     $('.search_notes').val('')
@@ -573,39 +550,88 @@ $('.ui-refresh-notes').click(() => {
     parseServerToNotes(notesList, (list, notes) => {
         parseNotesCallback(list, notes)
         $('.ui-use-notes-tags').select2('val', lastTags)
-        $('.ui-use-notes-tags').trigger('change')
-        notesList.search(lastKeyword)
+        $('.ui-use-owner').select2('val', lastOwner)
         $('.search_notes').val(lastKeyword)
-        checkNotesList()
+        changeKeywords()
         $('#notes-list').slideDown('fast')
     })
 })
+*/
+/*
+ @brief         Filtering processing of a notebook list
+ @details       A dictionary is designated as an argument.
+                A key word of a dictionary is tags, owner, text.
+ @params[in]    keywords(dict)
+ @n             keywords.text (list)
+ @n             keywords.owner (list)
+ @n             keywords.tags (list)
+ */
+/*
 
-
-
-$('.ui-use-notes-tags').on('change', function () {
-    const tags = []
-    const data = $(this).select2('data')
-    for (let i = 0; i < data.length; i++) { tags.push(data[i].text) }
-    if (tags.length > 0) {
+function filteringNoteList(keywords) {
+    console.log(keywords)
+    let length = 0
+    for(var key in keywords) {
+        length += keywords[key].length
+    }
+    if (length == 0){
+        notesList.filter()
+    } else {
         notesList.filter(item => {
             const values = item.values()
-            if (!values.tags) return false
+            console.log(values)
+            console.log(keywords)
             let found = false
-            for (let i = 0; i < tags.length; i++) {
-                if (values.tags.includes(tags[i])) {
-                    found = true
-                    break
+            for(var key in keywords) {
+                if ( ! values[key]) {
+                    continue
+                }
+                for (let i = 0; i < keywords[key].length; i++) {
+                    if ((typeof values) == "string") {
+                        console.log("string")
+                        console.log(values[key])
+                        console.log(keywords[key][i])
+                        if (values[key] == keywords[key][i].text) {
+                            found = true
+                            break
+                        }
+                    } else {
+                        console.log("!string")
+                        if (values[key].includes(keywords[key][i].text)) {
+                            found = true
+                            break
+                        }
+                    }
                 }
             }
             return found
         })
-    } else {
-        notesList.filter()
     }
     checkNotesList()
-})
+}
 
+function changeKeywords(){
+    const tags = $(".ui-use-notes-tags").select2('data')
+    const owner = $(".ui-use-owners").select2('data')
+    var title = $(".search_notes").val()
+    title = title.trim()
+    console.log(title.length)
+    if (title.length == 0){
+        title = []
+    } else {
+        title = [{text:title}]
+    }
+    console.log(title)
+    filteringNoteList({
+        owner: owner,
+        tags:tags,
+        text: title
+    })
+}
+
+$('.ui-use-notes-tags').on('change', changeKeywords)
+$('.ui-use-owners').on('change', changeKeywords)
+$('.search_notes').keyup(changeKeywords)
 
 notesList.on('updated', e => {
   for (let i = 0, l = e.items.length; i < l; i++) {
@@ -614,16 +640,12 @@ notesList.on('updated', e => {
       const itemEl = $(item.elm)
       const values = item._values
       const a = itemEl.find('a')
-      const pin = itemEl.find('.ui-note-pin')
       const tagsEl = itemEl.find('.tags')
-      // parse link to element a
       a.attr('href', `${serverurl}/${values.id}`)
-      // parse tags
       const tags = values.tags
       if (tags && tags.length > 0 && tagsEl.children().length <= 0) {
         const labels = []
         for (let j = 0; j < tags.length; j++) {
-          // push into the item label
           labels.push(`<span class='label label-default'>${tags[j]}</span>`)
         }
         tagsEl.html(labels.join(' '))
@@ -631,9 +653,4 @@ notesList.on('updated', e => {
     }
   }
 })
-
-$('.search_notes').keyup(() => {
-    console.log("1")
-    checkNotesList()
-})
-
+*/

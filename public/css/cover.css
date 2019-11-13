@@ -371,6 +371,12 @@ select {
     .ui-use-tags {
         max-width: 100%;
     }
+    .ui-use-notes-tags {
+        max-width: 100%;
+    }    
+    .ui-use-owners {
+        max-width: 100%;
+    }
 }
 
 .btn-mattermost {
@@ -441,6 +447,15 @@ a.btn.btn-social > i.oauth-icon > img {
     min-width: 172px;
     max-width: 344px;
 }
+@media (max-width: 768px) {
+    span.ui-or {
+        display: block;
+    }
+    .ui-use-notes-tags {
+        max-width: 100%;
+    }
+}
+
 
 .ui-notes-close {
     position: absolute;
@@ -467,4 +482,18 @@ a.btn.btn-social > i.oauth-icon > img {
 .item .ui-notes-pin.active {
 	opacity: 1;
     color: #d43f3a;
+}
+
+.ui-use-owners {
+    min-width: 172px;
+    max-width: 344px;
+}
+
+@media (max-width: 768px) {
+    span.ui-or {
+        display: block;
+    }
+    .ui-use-owners {
+        max-width: 100%;
+    }
 }
