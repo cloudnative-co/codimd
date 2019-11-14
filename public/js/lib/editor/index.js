@@ -17,6 +17,7 @@ const jumpToAddressBarKeymapName = isMac ? 'Cmd-L' : 'Ctrl-L'
 export default class Editor {
   constructor () {
     this.editor = null
+    this.recognition = null
     this.jumpToAddressBarKeymapValue = null
     this.defaultExtraKeys = {
       F10: function (cm) {
@@ -161,6 +162,7 @@ export default class Editor {
     var makeTable = $('#makeTable')
     var makeLine = $('#makeLine')
     var makeComment = $('#makeComment')
+    var makeMic = $('#makeMic')
     var tagsModal = $('#tagsModal')
     var addMetaTag = $('#addMetaTag')
     var updateMetadata = $('#updateMetadata')
@@ -237,6 +239,54 @@ export default class Editor {
     makeComment.click(() => {
       utils.insertText(this.editor, '> []')
     })
+
+    this.recognition.onerror = function( event ) {
+        console.log("ERROR :" + event.error);
+    }
+    this.recognition.onspeechstart = function( event ) {
+        console.log("Speech Start");
+    }
+    this.recognition.onspeechend = function( event ) {
+        console.log("Speech End");
+    }
+    this.recognition.onstart = function( event ) {
+        console.log("Start");
+    }
+    this.recognition.onend = function( event ) {
+        var flag = makeMic.attr("toggle")
+        flag = flag.toLowerCase() === 'true';
+        if (flag) {
+            makeMic.attr("toggle", "false")
+            makeMic.children('i').toggleClass('fa-microphone-slash');
+            makeMic.children('i').toggleClass('fa-microphone');
+            $("#speechEndModal").modal('show')
+        }
+        console.log("End");
+    }
+    this.recognition.onresult = function(e) {
+        if ( 0 < e.results.length) {
+            var speechText = e.results[e.results.length -1][0].transcript + "\n"
+            console.log(speechText)
+            const cur = this.editor.getCursor()
+            this.editor.replaceSelection(speechText, cur, cur)
+            this.editor.focus()
+            this.editor.setCursor({ line: cur.line + 1, ch: 0})
+        }
+    }
+    makeMic.click(() => {
+        var flag = makeMic.attr("toggle")
+        flag = flag.toLowerCase() === 'true';
+        if (flag) {
+            this.recognition.stop();
+            makeMic.attr("toggle", "false")
+        } else {
+            this.recognition.start();
+            makeMic.attr("toggle", "true")
+        }
+        makeMic.children('i').toggleClass('fa-microphone-slash');
+        makeMic.children('i').toggleClass('fa-microphone');
+    })
+
     /*
      @brief     メタデータダイアログ更新ボタンクリック
      */
@@ -784,6 +834,10 @@ export default class Editor {
     })
     this.tableEditor = initTableEditor(this.editor)
 
+    window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+    this.recognition = new window.SpeechRecognition();
+    this.recognition.continuous = true;
+    this.recognition.editor = this.editor
 
     /*
      @brief     メタデータライン取得
