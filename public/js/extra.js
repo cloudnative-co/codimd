@@ -511,6 +511,27 @@ export function finishView (view) {
         height: '400px'
       })
     })
+    // box
+  view.find('div.box.raw').removeClass('raw')
+    .each(function (key, value) {
+        const id = $(value).attr('data-box-file-id')
+        const url = `${serverurl}/box/embed?id=${id}`
+        console.log(id)
+        console.log(url)
+        const inner = $('<div>')
+        $(this).append(inner)
+
+        $.ajax({
+            type: 'GET',
+            url: url
+        }).then((data) => {
+            console.log(data)
+            inner.append(data)
+        }, (e) => {
+            console.log(e)
+        });
+    })
+
     // syntax highlighting
   view.find('code.raw').removeClass('raw')
     .each((key, value) => {
@@ -1256,9 +1277,25 @@ const pdfPlugin = new Plugin(
 
   (match, utils) => {
     const pdfurl = match[1]
+    console.log("pdf")
     if (!isValidURL(pdfurl)) return match[0]
     const div = $('<div class="pdf raw"></div>')
     div.attr('data-pdfurl', pdfurl)
+    return div[0].outerHTML
+  }
+)
+
+// box
+const boxPlugin = new Plugin(
+  /{%box\s*([\d\D]*?)\s*%}/,
+
+  (match, utils) => {
+    console.log("box")
+    const id = match[1].split(/[?&=]+/)[0]
+    console.log("ID: " + id)
+    if (!id) return
+    const div = $('<div class="box raw"></div>')
+    div.attr('data-box-file-id', id)
     return div[0].outerHTML
   }
 )
@@ -1328,6 +1365,7 @@ md.use(tocPlugin)
 md.use(slidesharePlugin)
 md.use(speakerdeckPlugin)
 md.use(pdfPlugin)
+md.use(boxPlugin)
 
 export default {
   md

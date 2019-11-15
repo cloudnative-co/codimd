@@ -201,6 +201,10 @@ const supportExternals = [
   {
     text: '{%pdf pdfurl %}',
     search: 'pdf'
+  },
+  {
+    text: '{%box boxid %}',
+    search: 'box'
   }
 ]
 const supportExtraTags = [
