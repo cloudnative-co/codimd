@@ -17,7 +17,7 @@ const jumpToAddressBarKeymapName = isMac ? 'Cmd-L' : 'Ctrl-L'
 export default class Editor {
   constructor () {
     this.editor = null
-    this.recognition = null
+    //this.recognition = null
     this.jumpToAddressBarKeymapValue = null
     this.defaultExtraKeys = {
       F10: function (cm) {
@@ -239,7 +239,7 @@ export default class Editor {
     makeComment.click(() => {
       utils.insertText(this.editor, '> []')
     })
-
+    /*
     this.recognition.onerror = function( event ) {
         console.log("ERROR :" + event.error);
     }
@@ -286,7 +286,7 @@ export default class Editor {
         makeMic.children('i').toggleClass('fa-microphone-slash');
         makeMic.children('i').toggleClass('fa-microphone');
     })
-
+    */
     /*
      @brief     メタデータダイアログ更新ボタンクリック
      */
@@ -833,11 +833,12 @@ export default class Editor {
       placeholder: "← Start by entering a title here\n===\nVisit /features if you don't know what to do.\nHappy hacking :)"
     })
     this.tableEditor = initTableEditor(this.editor)
-
+    /*
     window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
     this.recognition = new window.SpeechRecognition();
     this.recognition.continuous = true;
     this.recognition.editor = this.editor
+    */
 
     /*
      @brief     メタデータライン取得
