@@ -6,6 +6,7 @@
  * Author: Roy van Kaathoven
  * Contact: ik@royvankaathoven.nl
  */
+
 (function(document, window) {
   'use strict';
 
@@ -144,6 +145,13 @@
     allowedTypes: window.allowedUploadMimeTypes,
 
     /**
+     * Allowed Box Content MIME types
+     */
+    allowedBoxTypes: window.allowedBoxUploadMimeTypes,
+
+    allowedUnfoldCodeType: window.allowedUnfoldCodeMimeType,
+
+    /**
      * Text which will be inserted when dropping or pasting a file.
      * Acts as a placeholder which will be replaced when the file is done with uploading
      */
@@ -155,6 +163,46 @@
      * by the filename that has been returned by the server
      */
     urlText: "![]({filename})",
+
+    boxText: "{%box {filename} %}",
+
+    codeText: {
+        'text/css': "```css=\n{filename}\n```\n",
+        'text/html': "```htmlmixed=\n{filename}\n```\n",
+        'text/x-c': "```clike=\n{filename}\n```\n",
+        'text/x-c++hdr': "```cpp\n{filename}\n```\n",
+        'text/x-c++src': "```cpp=\n{filename}\n```\n",
+        'text/x-csharp': "```cs=\n{filename}\n```\n",
+        'text/x-coffee': "```coffee=\n{filename}\n```\n",
+        'text/x-cmake': "```cmake=\n{filename}\n```\n",
+        'text/x-diff': "```diff=\n{filename}\n```\n",
+        'text/x-haskel': "```haskel=\n{filename}\n```\n",
+        'text/x-go': "```go=\n{filename}\n```\n",
+        'text/x-gherkin': "```gherkin=\n{filename}\n```\n",
+        'text/x-haskel': "```haskel=\n{filename}\n```\n",
+        'text/javascript': "```javascript=\n{filename}\n```\n",
+        "text/x-jsx": "```jsx=\n{filename}\n```\n",
+        'text/x-java': "```java=\n{filename}\n```\n",
+        'application/json': "```json=\n{filename}\n```\n",
+        "text/x-lua": "```lua=\n{filename}\n```\n",
+        'text/xml': "```xml=\n{filename}\n```\n",
+        'application/xml': "```xml=\n{filename}\n```\n",
+        'text/x-objcsrc': "```objectivec=\n{filename}\n```\n",
+        'text/x-objectivec': "```objectivec=\n{filename}\n```\n",
+        'text/x-perl': "```perl=\n{filename}\n```\n",
+        'text/x-php': "```php=\n{filename}\n```\n",
+        'text/x-properties': "```properties=\n{filename}\n```\n",
+        'text/x-pug': "```pug=\n{filename}\n```\n",
+        'text/x-python': "```python=\n{filename}\n```\n",
+        'text/x-ruby': "```ruby=\n{filename}\n```\n",
+        'text/x-sass': "```sass=\n{filename}\n```\n",
+        'text/x-shellscript': "```shell=\n{filename}\n```\n",
+        'text/x-sql': "```sql=\n{filename}\n```\n",
+        'text/x-typescript': "```typescript=\n{filename}\n```\n",
+        'text/x-vega': "```vega\n{filename}\n```\n",
+        "text/x-yaml": "```yaml=\n{filename}\n```\n"
+    },
+
 
     /**
      * Text which will be used when uploading has failed
@@ -214,7 +262,7 @@
    * @param  {Blob} file blob data received from event.dataTransfer object
    * @return {XMLHttpRequest} request object which sends the file
    */
-  inlineAttachment.prototype.uploadFile = function(file, id) {
+  inlineAttachment.prototype.uploadFile = function(file, id, is_box) {
     var me = this,
       formData = new FormData(),
       xhr = new XMLHttpRequest(),
@@ -265,7 +313,7 @@
     xhr.onload = function() {
       // If HTTP status is OK or Created
       if (xhr.status === 200 || xhr.status === 201) {
-        me.onFileUploadResponse(xhr, id);
+        me.onFileUploadResponse(xhr, id, is_box);
       } else {
         me.onFileUploadError(xhr, id);
       }
@@ -275,7 +323,140 @@
     }
     return xhr;
   };
-
+  inlineAttachment.prototype.extendFileType = function(file) {
+    if (! file.name){
+        return file
+    }
+    const filename = file.name
+    var ext = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
+    const ext_mime = {
+      "dcm": "application/dicom",
+      "dicm": "application/dicom",
+      "dicom": "application/dicom",
+      "json": "application/json",
+      "doc": "application/msword",
+      "rtf": "application/msword",
+      "pdf": "application/pdf",
+      "ai": "application/postscript",
+      "eps": "application/postscript",
+      "ps": "application/postscript",
+      "sml": "application/smil+xml",
+      "gdoc": "application/vnd.google-apps.document",
+      "gsheet": "application/vnd.google-apps.spreadsheet",
+      "scm": "application/vnd.lotus-screencam",
+      "csv": "application/vnd.ms-excel",
+      "xls": "application/vnd.ms-excel",
+      "xlsm": "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "ppt": "application/vnd.ms-powerpoint",
+      "odp": "application/vnd.oasis.opendocument.presentation",
+      "ods": "application/vnd.oasis.opendocument.spreadsheet",
+      "odt": "application/vnd.oasis.opendocument.text",
+      "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "wpd": "application/vnd.wordperfect",
+      "as": "application/x-actionscript",
+      "xsd": "application/xml",
+      "msg": "application/x-msg",
+      "aac": "audio/aac",
+      "amr": "audio/amr",
+      "au": "audio/basic",
+      "mp3": "audio/mmpeg",
+      "m4a": "audio/mp4",
+      "ogg": "audio/ogg",
+      "wav": "audio/wav",
+      "aifc": "audio/x-aiff",
+      "aiff": "audio/x-aiff",
+      "flac": "audio/x-flac",
+      "wma": "audio/x-ms-wma",
+      "ra": "audio/x-realaudio",
+      "bmp": "image/bmp",
+      "gif": "image/gif",
+      "jpeg": "image/jpeg",
+      "jpg": "image/jpeg",
+      "png": "image/png",
+      "svg": "image/svg+xml",
+      "tga": "image/targa",
+      "tif": "image/tiff",
+      "tiff": "image/tiff",
+      "psd": "image/x-photoshop",
+      "bat": "magnus-internal/cgi",
+      "css": "text/css",
+      "htm": "text/html",
+      "html": "text/html",
+      "js": "text/javascript",
+      "cmake": "text/plain",
+      "erb": "text/plain",
+      "groovy": "text/plain",
+      "h": "text/x-c",
+      "make": "text/plain",
+      "txt": "text/plain",
+      "vi": "text/plain",
+      "vim": "text/plain",
+      "as3": "text/x-actionscript",
+      "asm": "text/x-asm ",
+      "c": "text/x-c",
+      "hh": "text/x-c++hdr",
+      "cc": "text/x-c++src",
+      "cpp": "text/x-c++src",
+      "hpp": "text/x-c++hdr",
+      "cxx": "text/x-c++src",
+      "coffee": "text/x-coffeescript",
+      "cmake": "text/x-cmake",
+      "cs": "text/x-csharp",
+      "diff": "text/x-diff",
+      "go": "text/x-go",
+      "feature": "text/x-gherkin",
+      "haml": "text/x-haml",
+      "hs": "text/x-haskel",
+      "ini": "text/x-ini",
+      "java": "text/x-java",
+      "jsx": "text/x-jsx",
+      "less": "text/x-less",
+      "lua": "text/x-lua",
+      "xml": "text/xml",
+      "xsl": "text/xml",
+      "ml": "text/x-ml",
+      "m": "text/x-objcsrc",
+      "mm": "text/x-objectivec",
+      "pl": "text/x-perl",
+      "php": "text/x-php",
+      "properties": "text/x-properties",
+      "pug": "text/x-pug",
+      "py": "text/x-python",
+      "rb": "text/x-ruby",
+      "sass": "text/x-sass",
+      "scala": "text/x-scala",
+      "sh": "text/x-shellscript",
+      "sql": "text/x-sql",
+      "ts": "text/x-typescript",
+      "vega": "text/x-vega",
+      "yaml": "text/x-yaml",
+      "3gp": "video/3gpp",
+      "3g2": "video/3gpp2",
+      "m4v": "video/mp4",
+      "mp4": "video/mp4",
+      "m2v": "video/mpeg",
+      "mpeg": "video/mpeg",
+      "mpg": "video/mpeg",
+      "ogg": "video/ogg",
+      "qt": "video/quicktime",
+      "mts": "video/vnd.dlna.mpeg-tts",
+      "m2ts": "video/vnd.dlna.mpeg-tts",
+      "mkv": "video/x-matroska",
+      "avi": "video/x-msvideo",
+      "wmv": "video/x-ms-wmv",
+      "mov": "viode/quicktime"
+    }
+    if (ext){
+        ext = ext[0]
+        file.extension = ext
+    }
+    if (ext_mime[ext]){
+        file.mime = ext_mime[ext]
+    }
+    return file
+  };
   /**
    * Returns if the given file is allowed to handle
    *
@@ -290,21 +471,54 @@
   };
 
   /**
+   * Returns if the given file is allowed to handle
+   *
+   * @param {File} clipboard data file
+   */
+  inlineAttachment.prototype.isFileBoxAllowed = function(file) {
+    if (this.settings.allowedBoxTypes.indexOf('*') === 0){
+      return true;
+    } else {
+      return this.settings.allowedBoxTypes.indexOf(file.type) >= 0;
+    }
+  };
+
+  inlineAttachment.prototype.isFileUnfoldCodeAllowed = function(file) {
+    if (this.settings.allowedUnfoldCodeType.indexOf('*') === 0){
+      return true;
+    } else {
+      return this.settings.allowedUnfoldCodeType.indexOf(file.mime) >= 0;
+    }
+  };
+
+
+  /**
    * Handles upload response
    *
    * @param  {XMLHttpRequest} xhr
    * @return {Void}
    */
-  inlineAttachment.prototype.onFileUploadResponse = function(xhr, id) {
+  inlineAttachment.prototype.onFileUploadResponse = function(xhr, id, is_box) {
     if (this.settings.onFileUploadResponse.call(this, xhr) !== false) {
       var result = JSON.parse(xhr.responseText),
         filename = result[this.settings.jsonFieldName];
 
       if (result && filename) {
+          var fileid;
+          if (filename.id) {
+            fileid = filename.id
+            filename = filename.url;
+          }
           var replacements = [];
           var string = this.settings.progressText.replace(this.filenameTag, id);
           var lines = this.editor.getValue().split('\n');
-        var newValue = this.settings.urlText.replace(this.filenameTag, filename);
+
+          var newValue;
+          if (! is_box) {
+            newValue = this.settings.urlText.replace(this.filenameTag, filename);
+          } else {
+            newValue = this.settings.boxText.replace(this.filenameTag, fileid);
+          }
           for(var i = 0; i < lines.length; i++) {
             var ch = lines[i].indexOf(string);
             if(ch != -1)
@@ -350,8 +564,6 @@
       this.editor.insertValue(this.lastValue + "\n");
     }
   };
-
-
   /**
    * Called when a paste event occured
    * @param  {Event} e
@@ -390,14 +602,36 @@
    * @return {Boolean} if the event was handled
    */
   inlineAttachment.prototype.onDrop = function(e) {
+    var me = this
     var result = false;
     for (var i = 0; i < e.dataTransfer.files.length; i++) {
       var file = e.dataTransfer.files[i];
+      file = this.extendFileType(file)
       if (this.isFileAllowed(file)) {
         result = true;
         var id = ID();
         this.onFileInserted(file, id);
         this.uploadFile(file, id);
+      } else if (this.isFileUnfoldCodeAllowed(file)){
+        if (this.settings.codeText[file.mime]){
+            result = true;
+            var codeTxt = this.settings.codeText[file.mime]
+            var reader = new FileReader();
+            reader.onload = function (evt) {
+                var b64Data = reader.result
+                b64Data = b64Data.substr(b64Data.indexOf(',')+1)
+                var txtData = b64Data.replace(/\s/g, '');
+                txtData = decodeURIComponent(escape(window.atob(txtData)));
+                txtData = codeTxt.replace(me.filenameTag, txtData);
+                me.editor.insertValue(txtData);
+            }
+            reader.readAsDataURL(file);
+        }
+      } else if (this.isFileBoxAllowed(file)) {
+        result = true;
+        var id = ID();
+        this.onFileInserted(file, id);
+        this.uploadFile(file, id, true);
       }
     }
 
