@@ -516,8 +516,6 @@ export function finishView (view) {
     .each(function (key, value) {
         const id = $(value).attr('data-box-file-id')
         const url = `${serverurl}/box/embed?id=${id}`
-        console.log(id)
-        console.log(url)
         const inner = $('<div>')
         $(this).append(inner)
 

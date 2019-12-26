@@ -931,15 +931,78 @@ ui.toolbar.extra.slide.attr('href', noteurl + '/slide')
 // download
 // markdown
 ui.toolbar.download.markdown.click(function (e) {
-  e.preventDefault()
-  e.stopPropagation()
-  var filename = renderFilename(ui.area.markdown) + '.md'
-  var markdown = editor.getValue()
-  var blob = new Blob([markdown], {
-    type: 'text/markdown;charset=utf-8'
-  })
-  saveAs(blob, filename, true)
+
+    var downloadFileFromBlob = (function () {
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        return function (data, fileName) {
+            var blob = new Blob(data, {
+                type : "octet/stream"
+            }),
+            url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        };
+    }());
+
+    console.log("DOWNLOAD")
+    e.preventDefault()
+    e.stopPropagation()
+    var ss = require('socket.io-stream');
+    var fs = require('fs');
+    var deferred = $.Deferred();
+    var stream = ss.createStream();
+    var fileBuffer = [];
+    var fileLength = 0;
+
+    ss(socket).emit('download', stream, null, function (fileError, fileInfo) {
+        if (fileError) {
+            console.log(fileError)
+            deferred.reject(fileError);
+        } else {
+            console.log(['File Found!', fileInfo]);
+            //== Receive data
+            stream.on('data', function (chunk) {
+                fileLength += chunk.length;
+                var progress = Math.floor((fileLength / fileInfo.size) * 100);
+                progress = Math.max(progress - 2, 1);
+                deferred.notify(progress);
+                fileBuffer.push(chunk);
+            });
+            stream.on('end', function () {
+                var filedata = new Uint8Array(fileLength),
+                i = 0;
+
+                //== Loop to fill the final array
+                fileBuffer.forEach(function (buff) {
+                    for (var j = 0; j < buff.length; j++) {
+                        filedata[i] = buff[j];
+                        i++;
+                    }
+                });
+
+                deferred.notify(100);
+
+                //== Download file in browser
+                downloadFileFromBlob([filedata], fileInfo.name);
+                deferred.resolve();
+            });
+        }
+    });
+    return deferred;
+    /*
+    var filename = renderFilename(ui.area.markdown) + '.md'
+    var markdown = editor.getValue()
+    var blob = new Blob([markdown], {
+        type: 'text/markdown;charset=utf-8'
+    })
+    saveAs(blob, filename, true)
+    */
 })
+
 // html
 ui.toolbar.download.html.click(function (e) {
   e.preventDefault()
@@ -1254,7 +1317,7 @@ $('#revisionModalDownload').click(function () {
 })
 $('#revisionModalRevert').click(function () {
   if (!revision) return
-  editor.setValue(revision.content)
+  socket.emit('revision', revisionTime)
   ui.modal.revision.modal('hide')
 })
 // snippet projects
@@ -1706,6 +1769,7 @@ window.havePermission = havePermission
 
 // socket.io actions
 var io = require('socket.io-client')
+
 var socket = io.connect({
   path: urlpath ? '/' + urlpath + '/socket.io/' : '',
   query: {
@@ -1737,6 +1801,10 @@ socket.on('info', function (data) {
       break
   }
 })
+socket.on('revision', function (data) {
+    editor.setValue(data)
+})
+
 socket.on('error', function (data) {
   console.error(data)
   if (data.message && data.message.indexOf('AUTH failed') === 0) { location.href = serverurl + '/403' }
