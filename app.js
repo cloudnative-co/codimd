@@ -60,6 +60,24 @@ app.use(morgan('combined', {
 
 // socket io
 var io = require('socket.io')(server)
+if (config.session) {
+    if (config.session.type == "redis") {
+        const redis = require("redis");
+        const redisAdapter = require('socket.io-redis');
+        var redis_host = config.session.host
+        var redis_port = config.session.port
+        var pub = redis.createClient(redis_port, redis_host);
+        var sub = redis.createClient(redis_port, redis_host);
+        io.adapter(redisAdapter({
+            Host: redis_host,
+            port: redis_port,
+            key: 'codimd-session',
+            pubClient: pub,
+            subClient: sub,
+        }));
+    }
+}
+
 io.engine.ws = new (require('ws').Server)({
   noServer: true,
   perMessageDeflate: false
